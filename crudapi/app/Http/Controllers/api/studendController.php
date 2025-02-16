@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Student;
 use Illuminate\support\Facades\Validator;
+use Illuminate\Validation\Rules\Unique;
 
 class studendController extends Controller{ 
      public function index()
@@ -28,10 +29,10 @@ class studendController extends Controller{
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required | max:255',
-            'email' => 'required|email',
+            'email' => 'required|email|unique:students',
             'password' => 'required',
-            'phone' => 'required | numeric',
-            ]);
+            'phone' => 'required',
+            ],['email.unique' => 'Student with this email already exists']);
 
         if ($validator->fails()) {
             return response()->json([
@@ -39,7 +40,7 @@ class studendController extends Controller{
                 'status' => 422,
             ], 422);
         }
-        $students = Student::createst([
+        $students = Student::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => $request->password,
@@ -108,16 +109,16 @@ class studendController extends Controller{
 
         $validator = Validator::make($request->all(), [
             'name' => 'required | max:255',
-            'email' => 'required|email',
+            'email' => 'required|email|unique:students',
             'password' => 'required',
             'phone' => 'required | numeric',
-            ]);
-        if ($validator->fails()) {
-            $data=[
-                'message'=> 'Validation failed',
-                'status'=> 422
-                ];
-                return response()->json($data,422);
+            ],['email.unique' => 'Student with this email already exists']);
+            
+            if ($validator->fails()) {
+                return response()->json([
+                    'message' => 'Validation failed',
+                    'errors' => $validator->errors(), 
+                    'status' => 422], 422);
             }
             $student->name = $request->name;
             $student->email = $request->email;
@@ -146,7 +147,7 @@ class studendController extends Controller{
             'name' =>  'max:255',
             'email' => 'email',
             'password' => 'digits:6',
-            'phone' => 'in:numeric',
+            'phone' => 'numeric',
             ]);
             
             if ($validator->fails()) {
